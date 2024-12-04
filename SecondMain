@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Random;
 
@@ -8,85 +9,99 @@ public class RussianRoulette {
         Revolver revolver = new Revolver();
         Display display = new Display();
         clearConsole clear = new clearConsole();
+        Scanner scaner = new Scanner(System.in);
 
         if(display.menu()==11){ //SinglePlayer
+            System.out.println("count of Players: ");
+            int count_p = scaner.nextInt();
+           
+            System.out.println(Revolver.string_of_Players(count_p));
             revolver.setDrum();
             display.reload();
             display.revolverInfo();
-            revolver.coinInfo();
+                     
             System.out.println();
-            if (revolver.Fire()) {
-                display.lose();
-            } else {
-                display.win();
-            }
-        } /*else{ //multiplayer
-            for (int i=0;i<2;i++){
-                for (int j=0;j<6;j++){
-
+                         if (revolver.Fire()) {
+                            display.lose();
+                        } else {
+                            display.win();
+                        }
+                    } /*else{ //multiplayer
+                        for (int i=0;i<2;i++){
+                            for (int j=0;j<6;j++){
+            
+                            }
+                        }*/
+                    /*}*/
                 }
-            }*/
-        /*}*/
-    }
-}
-
-class Revolver extends Display{
-
-    Random random = new Random();
-    int[] drum = new int[(int)(Math.random()*(5)+2)];  // ot 2 do 6 random massiv.kobeitkin kelse 5 ti ozgert biraq 2 ge tispe
-    int length = drum.length;
-    int badPellets = (int) (Math.random()*(drum.length/2)+1);
-
-
-    public void setDrum() {       //<----------МЫНАҒАН 8 или 12 ОК БОЛАТЫНЫН И Т.Д. ЖАСАЙ САЛ
-
-        for (int i=0;i<badPellets;i++){
-            drum[i] = 1;
-        }
-
-        for (int i=0;i<drum.length;i++){
-
-
-            if (i==5){
-                break;
             }
-            int temp;
-
-            for (int j=0;j < drum.length-1;j++){
-                int random_for_shafl = random.nextInt(j+1);
-                temp = drum[j];
-                drum[j] = drum[random_for_shafl]; // new shafl хз кайсысы норм
-                drum[j+1] = temp;
-            }
+            
+            class Revolver extends Display{
+            
+                Random random = new Random();
+                int[] drum = new int[(int)(Math.random()*(5)+2)];  // ot 2 do 6 random massiv.kobeitkin kelse 5 ti ozgert biraq 2 ge tispe
+                int length = drum.length;
+                int badPellets = (int) (Math.random()*(drum.length/2)+1);
+            
+            
+                public void setDrum() {       //<----------МЫНАҒАН 8 или 12 ОК БОЛАТЫНЫН И Т.Д. ЖАСАЙ САЛ
+            
+                    for (int i=0;i<badPellets;i++){
+                        drum[i] = 1;
+                    }
+            
+                    for (int i=0;i<drum.length;i++){
+            
+            
+                        if (i==drum.length-1){
+                            break;
+                        }
+                        int temp;
+            
+                        for (int j=0;j < drum.length-1;j++){
+                            int random_for_shafl = random.nextInt(j+1);
+                            temp = drum[j];
+                            drum[j] = drum[random_for_shafl]; // new shafl хз кайсысы норм
+                            drum[random_for_shafl] = temp;
+                        }
+                    }
+                }
+            
+        public static String string_of_Players (int count_of_players){
+        Scanner scanner = new Scanner(System.in);
+        String [] array_players = new String[count_of_players];
+        for (int i = 0; i < array_players.length; i++) {
+            System.out.println("Enter the name "+(i+1)+" player name: ");
+            String name_palyer =  scanner.next();
+            array_players[i] = name_palyer;
         }
+       
+        return Arrays.toString(array_players);
     }
 
-    public void coinInfo(){
-        System.out.println();
-        System.out.printf("Currently you have %d coin",coin);
-        System.out.println();
-    }
+   
 
+
+
+   
+    static int count_of_moves = 0; 
     public boolean Fire(){
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Want to shoot yourself or your opponent(It costs 1 coin): ");
-        System.out.println("(Hint:For yourself type 'y', for opponent type 'o')");
-        String isShoot = scan.next().toLowerCase();
-        if (drum[length-1] == 1 || isShoot.equals("y")) {
-            return false;
-        }else if (drum[length-1] == 1 || isShoot.equals("o")) {
-            return true;
-        } else {
-            this.length -= 1;
-            coin += 1;
-            return Fire();
-        }
+        if (count_of_moves != drum.length-1) {
+            if (drum[count_of_moves] == 1) {
+                return true;
+                
+            }else {
+                return false;
+            }
+        }  count_of_moves+=1;
+       
+        return false;
     }
 }
 
 
 class Display{                                                     //ФИЧА КОС
-    int coin = 0;
+    
 
     public void revolverInfo(){
         System.out.println("\nGun reloaded and shuffled!");
