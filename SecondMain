@@ -1,0 +1,181 @@
+import java.util.*;
+import java.util.Random;
+
+//        clear.clearConsole();                    <---- КРЧ ЕЛДОС БУЛ КОНСОЛЬ ТАЗАЛАЙД
+
+public class RussianRoulette {
+    public static void main(String[] args) {
+        Revolver revolver = new Revolver();
+        Display display = new Display();
+        clearConsole clear = new clearConsole();
+
+        if(display.menu()==11){ //SinglePlayer
+            revolver.setDrum();
+            display.reload();
+            display.revolverInfo();
+            revolver.coinInfo();
+            System.out.println();
+            if (revolver.Fire()) {
+                display.lose();
+            } else {
+                display.win();
+            }
+        } /*else{ //multiplayer
+            for (int i=0;i<2;i++){
+                for (int j=0;j<6;j++){
+
+                }
+            }*/
+        /*}*/
+    }
+}
+
+class Revolver extends Display{
+
+    Random random = new Random();
+    int[] drum = new int[(int)(Math.random()*(5)+2)];  // ot 2 do 6 random massiv.kobeitkin kelse 5 ti ozgert biraq 2 ge tispe
+    int length = drum.length;
+    int badPellets = (int) (Math.random()*(drum.length/2)+1);
+
+
+    public void setDrum() {       //<----------МЫНАҒАН 8 или 12 ОК БОЛАТЫНЫН И Т.Д. ЖАСАЙ САЛ
+
+        for (int i=0;i<badPellets;i++){
+            drum[i] = 1;
+        }
+
+        for (int i=0;i<drum.length;i++){
+
+
+            if (i==5){
+                break;
+            }
+            int temp;
+
+            for (int j=0;j < drum.length-1;j++){
+                int random_for_shafl = random.nextInt(j+1);
+                temp = drum[j];
+                drum[j] = drum[random_for_shafl]; // new shafl хз кайсысы норм
+                drum[j+1] = temp;
+            }
+        }
+    }
+
+    public void coinInfo(){
+        System.out.println();
+        System.out.printf("Currently you have %d coin",coin);
+        System.out.println();
+    }
+
+    public boolean Fire(){
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Want to shoot yourself or your opponent(It costs 1 coin): ");
+        System.out.println("(Hint:For yourself type 'y', for opponent type 'o')");
+        String isShoot = scan.next().toLowerCase();
+        if (drum[length-1] == 1 || isShoot.equals("y")) {
+            return false;
+        }else if (drum[length-1] == 1 || isShoot.equals("o")) {
+            return true;
+        } else {
+            this.length -= 1;
+            coin += 1;
+            return Fire();
+        }
+    }
+}
+
+
+class Display{                                                     //ФИЧА КОС
+    int coin = 0;
+
+    public void revolverInfo(){
+        System.out.println("\nGun reloaded and shuffled!");
+
+        try {
+            Thread.sleep(333);
+        }
+
+        catch (InterruptedException ex){}
+
+        System.out.println("Good luck!");
+        System.out.println("-------Game Starts-------");
+    }
+
+    public void lose(){
+        System.out.println("You LOSE!");
+    }
+
+    public void win(){
+        System.out.println("You WIN!");
+    }
+
+    public void reload(){
+        for (int i = 0; i < 3; i++) {
+            char dot = '.';
+            System.out.print("Spinning the drum");
+            for (int j=0;j<3;j++){
+                try {
+                Thread.sleep(666);
+            } catch (InterruptedException ex) {
+            }
+                System.out.printf("%c",dot);
+            }
+            try {
+                Thread.sleep(2000);  //2000 ms = 2 sec
+            } catch (InterruptedException ex) {
+            }
+            System.out.println();
+
+        }
+    }
+
+
+    public int menu(){                                //DONE
+        Scanner scan = new Scanner(System.in);
+        int choice=0;
+        System.out.println("Welcome to the Russian Roulette game!");
+        System.out.println("Do you want to play?(y/n)");
+        String ScanDecision = scan.next().toLowerCase();
+        if (ScanDecision.equals("y")){
+            System.out.println("Here we go, partner!\n");
+            choice+=10;
+        }else if (ScanDecision.equals("n")) {
+            System.out.println("What a shame, partner!");
+            System.exit(0);
+        }else{
+            System.out.println("You typed that wrong, partner! Please make it clear next time!");
+        }
+//        ПОТОМ ДОБАВИМ БОТА И МУЛЬТИПЛЕЕР!
+        System.out.println("SinglePlayer or Multiplayer?(s/m)");
+        ScanDecision = scan.next().toLowerCase();
+        if (ScanDecision.equals("s")){
+            System.out.println("Starting Singleplayer!!\n");
+            choice += 1;
+        } else if (ScanDecision.equals("m")) {
+            System.out.println("Starting Multiplayer!!\n");
+            choice += 2;
+        }else{
+            System.out.println("You typed that wrong, partner! Please make it clear next time!");
+        }
+        return choice;
+    }
+}
+
+class clearConsole{                                         // DONE
+
+    public void clearConsole(){
+        try{
+            final String os = System.getProperty("os.name");
+
+            if (os.contains("Windows"))
+            {
+                Runtime.getRuntime().exec("cls");
+            }
+            else
+            {
+                Runtime.getRuntime().exec("clear");
+            }
+        }
+        catch (final Exception e) {}
+    }
+}
