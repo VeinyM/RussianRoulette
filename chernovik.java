@@ -4,181 +4,202 @@ public class RussianRoulette {
     public static void main(String[] args) {
         Revolver revolver = new Revolver();
         Display display = new Display();
-        clearConsole clear = new clearConsole();
+        Scanner scanner = new Scanner(System.in);
 
-//        clear.clearConsole();                    <---- КРЧ ЕЛДОС БУЛ КОНСОЛЬ ТАЗАЛАЙД
-        display.menu();
-//        if () {              <---ТУРА БЕРСЫН
+        if (display.menu() == 11) { // SinglePlayer
+            System.out.println("Count of players: ");
+            int count_p = scanner.nextInt();
+
+            System.out.println(Revolver.string_of_Players(count_p));
             revolver.setDrum();
             display.reload();
             display.revolverInfo();
-            System.out.println();
+
             if (revolver.Fire()) {
                 display.lose();
             } else {
                 display.win();
-//            }              Тура берсын
+            }
+        } else { // Multiplayer
+            System.out.println("Enter the number of players: ");
+            int count_p = scanner.nextInt();
+            List<String> players = new ArrayList<>();
+
+            for (int i = 0; i < count_p; i++) {
+                System.out.println("Enter name of player " + (i + 1) + ": ");
+                players.add(scanner.next());
+            }
+
+            revolver.setDrum();
+            display.reload();
+            display.revolverInfo();
+
+            int currentPlayerIndex = 0;
+            while (players.size() > 1) {
+                System.out.println("\nCurrent player: " + players.get(currentPlayerIndex));
+                System.out.println();
+                System.out.println("1. Shoot yourself");
+                System.out.println("2. Shoot another player");
+                int choice = scanner.nextInt();
+
+                if (choice == 1) {
+                    if (revolver.Fire()) {
+                        display.lose();
+                        System.out.println(players.get(currentPlayerIndex) + " is out!");
+                        players.remove(currentPlayerIndex);
+                        if (currentPlayerIndex == players.size()) {
+                            currentPlayerIndex = 0;
+                        }
+                    } else {
+                        System.out.println(players.get(currentPlayerIndex) + " survived!");
+                        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+                    }
+                } else if (choice == 2) {
+                    System.out.println("Choose a player to shoot:");
+                    for (int i = 0; i < players.size(); i++) {
+                        if (i != currentPlayerIndex) {
+                            System.out.println((i + 1) + ". " + players.get(i));
+                        }
+                    }
+                    int targetIndex = scanner.nextInt() - 1;
+                    if (targetIndex < 0 || targetIndex >= players.size() || targetIndex == currentPlayerIndex) {
+                        System.out.println("Invalid choice. Try again.");
+                        continue;
+                    }
+
+                    if (revolver.Fire()) {
+                        display.lose();
+                        System.out.println(players.get(targetIndex) + " is out!");
+                        players.remove(targetIndex);
+                        if (targetIndex < currentPlayerIndex) {
+                            currentPlayerIndex--;
+                        }
+                        if (currentPlayerIndex == players.size()) {
+                            currentPlayerIndex = 0;
+                        }
+                    } else {
+                        System.out.println(players.get(targetIndex) + " survived!");
+                        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+                    }
+                } else {
+                    System.out.println("Invalid choice. Try again.");
+                }
+            }
+
+            System.out.println("The winner is: " + players.get(0) + "!");
         }
     }
 }
 
-class Revolver{
-    
+class Revolver extends Display {
     Random random = new Random();
-    int[] drum = new int[(int)(Math.random()*(5)+2)];  // ot 2 do 6 random massiv.kobeitkin kelse 5 ti ozgert biraq 2 ge tispe
-    int length = drum.length;
-    int badPellets = (int) (Math.random()*(drum.length/2)+1); 
-    
+    int[] drum;
+    int currentBulletIndex = 0;
 
-    public void setDrum() {       //<----------МЫНАҒАН 8 или 12 ОК БОЛАТЫНЫН И Т.Д. ЖАСАЙ САЛ
+    public Revolver() {
+        drum = new int[random.nextInt(5) + 2]; // Random size between 2 and 6
+    }
 
-        for (int i=0;i<badPellets;i++){
+    public void setDrum() {
+        int badPellets = random.nextInt(drum.length / 2) + 1; // At least 1 bad pellet
+        Arrays.fill(drum, 0); // Reset drum to all empty
+        for (int i = 0; i < badPellets; i++) {
             drum[i] = 1;
         }
-
-        for (int i=0;i<drum.length;i++){
-            
-
-            if (i==5){
-                break;
-            }
-            int temp;
-
-            for (int j=0;j < drum.length-1;j++){
-                int random_for_shafl = random.nextInt(j+1);
-                temp = drum[j];
-                drum[j] = drum[random_for_shafl]; // new shafl хз кайсысы норм 
-                drum[j+1] = temp;
-            }
+        // Shuffle the drum
+        for (int i = 0; i < drum.length; i++) {
+            int swapIndex = random.nextInt(drum.length);
+            int temp = drum[i];
+            drum[i] = drum[swapIndex];
+            drum[swapIndex] = temp;
         }
+        currentBulletIndex = 0; // Reset index after reloading
+        System.out.println("Drum reloaded: " + Arrays.toString(drum));
     }
 
-    static int steps_of_moves = 0;  // shcetchic shagov
-    int n = 0;
-    public int choose_to_shoot(char answer){    // мынаны коса алмай турмын дисплей га, ооп  доконца тусынбедым 
-        System.out.println("Choose to shoot another person or yourself");
-        System.out.println("a/y");
-       
-        if (answer == 'a'){
-            if (drum[steps_of_moves] == 0) {
-                System.out.println("he's a lucky man...");
-                n = 10;
-            }else {
-                System.out.println("he's a dead...");
-                n = 12;  /// pobeda
-            }
-        } else if (answer == 'y'){
-            if (drum[steps_of_moves] == 1) {
-                System.out.println("LOL, you are dead!");
-                n = 11; // proigrysh
-            }else {
-                System.out.println("You are a lucky man...");
-                n = 10; // sledushii patronga otu, rekursiaga salu kerek 
-            }  
-
+    public boolean Fire() {
+        if (currentBulletIndex >= drum.length) {
+            System.out.println("\nAll bullets used! Reloading the revolver...");
+            setDrum(); // Reload the drum
         }
-                return n;
+        boolean result = drum[currentBulletIndex] == 1;
+        currentBulletIndex++;
+        return result;
     }
 
-    public boolean Fire(){
-        if (drum[length-1] == 1) {
-            return true;
-        }else {
-            this.length -= 1;
-            return Fire();
+    public static String string_of_Players(int count_of_players) {
+        Scanner scanner = new Scanner(System.in);
+        String[] array_players = new String[count_of_players];
+        for (int i = 0; i < array_players.length; i++) {
+            System.out.println("Enter the name of player " + (i + 1) + ": ");
+            array_players[i] = scanner.next();
         }
+        return Arrays.toString(array_players);
     }
 }
 
 
-class Display{                                                     //ФИЧА КОС
-
-    public void revolverInfo(){
+class Display {
+    public void revolverInfo() {
         System.out.println("\nGun reloaded and shuffled!");
-
         try {
-            Thread.sleep(200);
+            Thread.sleep(333);
+        } catch (InterruptedException ex) {
         }
-
-        catch (InterruptedException ex){}
-
         System.out.println("Good luck!");
+        System.out.println("-------Game Starts-------");
     }
 
-    public void lose(){
+    public void lose() {
         System.out.println("You LOSE!");
     }
 
-    public void win(){
+    public void win() {
         System.out.println("You WIN!");
     }
 
-    public void reload(){
+    public void reload() {
         for (int i = 0; i < 3; i++) {
-            char dot = '.';
-            System.out.print("Shuffling");
-            for (int j=0;j<3;j++){
+            System.out.print("Spinning the drum");
+            for (int j = 0; j < 3; j++) {
                 try {
-                Thread.sleep(666);
-            } catch (InterruptedException ex) {
-            }
-                System.out.printf("%c",dot);
-            }
-            try {
-                Thread.sleep(2000);  //2000 ms = 2 sec
-            } catch (InterruptedException ex) {
+                    Thread.sleep(666);
+                } catch (InterruptedException ex) {
+                }
+                System.out.print(".");
             }
             System.out.println();
-
         }
     }
 
-    public int menu(){                                //МЫНАНЫ ӨЗІМ ЖАСАЙ САЛАМ
+    public int menu() {
         Scanner scan = new Scanner(System.in);
-        int choice=0;
+
+        int choice = 0;
         System.out.println("Welcome to the Russian Roulette game!");
-        System.out.println("Do you want to play?(y/n)");
-        String ScanDecision = scan.next().toLowerCase();
-        if (ScanDecision.equals("y")){
+        System.out.println("Do you want to play? (y/n)");
+        String decision = scan.next().toLowerCase();
+        if (decision.equals("y")) {
             System.out.println("Here we go, partner!\n");
-            choice+=10;
-        }else if (ScanDecision.equals("n")) {
+            choice += 10;
+        } else if (decision.equals("n")) {
             System.out.println("What a shame, partner!");
             System.exit(0);
-        }else{
+        } else {
             System.out.println("You typed that wrong, partner! Please make it clear next time!");
         }
-//        ПОТОМ ДОБАВИМ БОТА И МУЛЬТИПЛЕЕР!
-        System.out.println("SinglePlayer or Multiplayer?(s/m)");
-        ScanDecision = scan.next().toLowerCase();
-        if (ScanDecision.equals("s")){
+
+        System.out.println("SinglePlayer or Multiplayer? (s/m)");
+        decision = scan.next().toLowerCase();
+        if (decision.equals("s")) {
             System.out.println("Starting Singleplayer!!\n");
             choice += 1;
-        } else if (ScanDecision.equals("m")) {
+        } else if (decision.equals("m")) {
             System.out.println("Starting Multiplayer!!\n");
             choice += 2;
-        }else{
+        } else {
             System.out.println("You typed that wrong, partner! Please make it clear next time!");
         }
         return choice;
-    }
-}
-
-class clearConsole{                                         // КОНСОЛЬ ТАЗАЛАУ
-
-    public void clearConsole(){
-        try{
-            final String os = System.getProperty("os.name");
-
-            if (os.contains("Windows"))
-            {
-                Runtime.getRuntime().exec("cls");
-            }
-            else
-            {
-                Runtime.getRuntime().exec("clear");
-            }
-        }
-        catch (final Exception e) {}
     }
 }
